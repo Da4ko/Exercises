@@ -124,7 +124,7 @@ GROUP BY(nationality);
 -- TASK 15
 -- List the first and last name of the student who received the absolute highest grade in the 'BIOLOGY' course.
 
-SELECT first_name, last_name, MAX(grade) FROM STUDENTS
+SELECT first_name, last_name, grade FROM STUDENTS
 JOIN GRADES ON GRADES.student_id = STUDENTS.student_id
 JOIN COURSES ON GRADES.course_id = COURSES.course_id
 WHERE title = "BIOLOGY" AND grade =(
