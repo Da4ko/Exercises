@@ -1,0 +1,134 @@
+----------------------------------------------------------------------------------------
+-- TASK1: 
+-- List all studets with last name DIMITROV which are for the 5th year at school.
+SELECT * FROM STUDENTS
+WHERE last_name = "DIMITROV" AND school_year = 5; 
+----------------------------------------------------------------------------------------
+-- TASK 2: 
+-- List first and last name of all students with nationality "BULGARIAN".
+-- First way:
+SELECT first_name, last_name FROM STUDENTS 
+JOIN NATIONALITY ON STUDENTS.nationality_id = NATIONALITY.NATIONALITY_ID
+WHERE NATIONALITY="BULGARIAN";
+
+-- Second way:
+SELECT first_name, last_name FROM STUDENTS 
+WHERE nationality_id IN(
+    SELECT nationality_id FROM NATIONALITY 
+    WHERE NATIONALITY = "BULGARIAN"
+) ;
+----------------------------------------------------------------------------------------
+-- Tasks 3 
+-- List first and last name of all students participating in 'MATHEMATICS' course.
+-- First way:
+SELECT first_name, last_name FROM STUDENTS 
+JOIN CLASSES ON STUDENTS.student_id = CLASSES.student_id
+JOIN COURSES ON CLASSES.course_id = COURSES.course_id
+WHERE title = "MATHEMATICS" ;
+
+-- Second way:
+SELECT first_name, last_name FROM STUDENTS
+WHERE student_id IN(
+    SELECT student_id FROM CLASSES WHERE course_id IN(
+        SELECT course_id FROM COURSES WHERE title = "MATHEMATICS"
+    )
+); 
+----------------------------------------------------------------------------------------
+-- TASK 4 
+-- List first and last name of all students and their grades (some students may not have grades yet, but should be present in the list). 
+
+SELECT first_name, last_name, grade FROM STUDENTS 
+LEFT JOIN GRADES ON STUDENTS.student_id = GRADES.student_id;
+----------------------------------------------------------------------------------------
+-- TASK 5 
+-- List names of all courses with more than 3 students in the course.
+
+SELECT title FROM COURSES
+JOIN CLASSES ON COURSES.course_id = CLASSES.course_id
+GROUP BY title
+HAVING count(CLASSES.student_id) > 3; 
+----------------------------------------------------------------------------------------
+-- TASK 6
+-- Calculate the average grade for all students in the 'MATHEMATICS' course.
+SELECT AVG(grade) FROM grades 
+JOIN CLASSES ON GRADES.course_id = CLASSES.course_id
+JOIN COURSES on CLASSES.course_id = COURSES.course_id
+where title = "MATHEMATICS";
+----------------------------------------------------------------------------------------
+-- TASK 7
+-- List the first and last names of all 'ENGLISH' students who are taking 'BIOLOGY'.
+
+SELECT STUDENTS.first_name, STUDENTS.last_name from STUDENTS 
+JOIN CLASSES on STUDENTS.student_id = CLASSES.student_id
+JOIN COURSES on CLASSES.course_id = COURSES.course_id
+where COURSES.title = "BIOLOGY" AND STUDENTS.student_id in (
+    SELECT STUDENTS.student_id FROM STUDENTS 
+    JOIN NATIONALITY ON NATIONALITY.nationality_id = STUDENTS.nationality_id
+    WHERE nationality = "ENGLISH"
+    
+);
+----------------------------------------------------------------------------------------
+-- TASK 8
+-- List the first and last names of students who are enrolled in more than 2 courses.
+
+SELECT CONCAT(first_name," ", last_name) as name_of_student FROM STUDENTS
+JOIN CLASSES on STUDENTS.student_id = CLASSES.student_id
+GROUP BY name_of_student
+HAVING COUNT(STUDENTS.student_id)>2;
+----------------------------------------------------------------------------------------
+-- TASK 9
+-- List the first and last names of students who are not enrolled in any courses yet. 
+
+SELECT first_name, last_name, class_id FROM STUDENTS
+LEFT JOIN CLASSES ON STUDENTS.student_id = CLASSES.student_id
+WHERE class_id IS NULL;
+----------------------------------------------------------------------------------------
+-- TASK 10
+-- List every nationality (the name, like 'BULGARIAN', 'ENGLISH') and the total number of students who have that nationality.
+
+SELECT nationality, COUNT(student_id) as number_of_students FROM NATIONALITY
+JOIN STUDENTS ON NATIONALITY.nationality_id = STUDENTS.nationality_id
+GROUP BY nationality;
+----------------------------------------------------------------------------------------
+-- TASK 11
+-- List the first and last names of students along with their average grade. But, only show the students whose average grade is higher than 4.
+
+SELECT first_name, last_name, AVG(grade) as average_grade FROM STUDENTS 
+JOIN GRADES on STUDENTS.student_id = GRADES.student_id
+GROUP BY STUDENTS.student_id
+HAVING average_grade > 4;
+----------------------------------------------------------------------------------------
+-- TASK 12
+-- List the title of each course and the highest single grade anyone got in that course. 
+
+SELECT title, MAX(grade) as max_grade FROM COURSES
+JOIN GRADES on COURSES.course_id = GRADES.course_id
+GROUP BY (title);
+----------------------------------------------------------------------------------------
+-- TASK 13
+-- List all course titles and the total number of students enrolled in each course. If a course has no students, it should still appear on the list with a count of 0
+
+SELECT title, COUNT(STUDENTS.student_id) as number_of_students FROM COURSES 
+LEFT JOIN CLASSES ON COURSES.course_id = CLASSES.course_id
+LEFT JOIN STUDENTS ON CLASSES.student_id = STUDENTS.student_id
+GROUP BY title;
+----------------------------------------------------------------------------------------
+-- TASK 14
+-- List every nationality name and the average grade of all students belonging to that nationality.
+
+SELECT nationality, AVG(grade) as average_grade FROM NATIONALITY
+JOIN STUDENTS ON NATIONALITY.nationality_id = STUDENTS.nationality_id
+JOIN GRADES ON STUDENTS.student_id = GRADES.student_id
+GROUP BY(nationality);
+----------------------------------------------------------------------------------------
+-- TASK 15
+-- List the first and last name of the student who received the absolute highest grade in the 'BIOLOGY' course.
+
+SELECT first_name, last_name, MAX(grade) FROM STUDENTS
+JOIN GRADES ON GRADES.student_id = STUDENTS.student_id
+JOIN COURSES ON GRADES.course_id = COURSES.course_id
+WHERE title = "BIOLOGY" AND grade =(
+    SELECT MAX(grade) FROM STUDENTS
+    JOIN GRADES ON GRADES.student_id = STUDENTS.student_id
+    JOIN COURSES ON GRADES.course_id = COURSES.course_id
+    WHERE title = "BIOLOGY");
